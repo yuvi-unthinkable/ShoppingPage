@@ -1,45 +1,45 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { initDB } from './src/database/db';
+import { View, Text, ActivityIndicator } from 'react-native';
+import ProductListScreen from './src/screens/ProductListScreen';
+import AddProductScreen from './src/screens/AddProductScreen';
+import ProductDetailScreen from './src/screens/ProductDetailScreen';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+const Stack = createNativeStackNavigator();
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+export default function App() {
+  const [dbReady, setDbReady] = useState(false);
+
+  useEffect(() => {
+    const setup = async () => {
+      try {
+        await initDB();
+        setDbReady(true);
+      } catch (e) {
+        console.error('❌ Failed to init DB:', e);
+      }
+    };
+    setup();
+  }, []);
+
+  if (!dbReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text>Initializing database...</Text>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Products" component={ProductListScreen} />
+        <Stack.Screen name="AddProduct" component={AddProductScreen} />
+        <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;

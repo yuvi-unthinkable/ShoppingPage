@@ -2,6 +2,7 @@
   "name": "ShoppingPage",
   "version": "0.0.1",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -10,10 +11,18 @@
     "test": "jest"
   },
   "dependencies": {
+    "@ptomasroos/react-native-multi-slider": "^2.2.2",
+    "@react-native-community/slider": "^5.1.1",
+    "@react-native/new-app-screen": "0.82.1",
+    "@react-navigation/native": "^7.1.19",
+    "@react-navigation/native-stack": "^7.6.2",
     "react": "19.1.1",
     "react-native": "0.82.1",
-    "@react-native/new-app-screen": "0.82.1",
-    "react-native-safe-area-context": "^5.5.2"
+    "react-native-fs": "^2.20.0",
+    "react-native-image-picker": "^8.2.1",
+    "react-native-quick-sqlite": "^8.2.7",
+    "react-native-safe-area-context": "^5.6.2",
+    "react-native-screens": "^4.18.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
