@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Text,
   TextInput,
@@ -15,9 +15,10 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigators/type';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { insertProductInDb } from '../database/db';
 import { copyToAppStorage } from '../../utils/fileHelper';
+import { checkAndRequestPermissions } from '../../utils/Permissions';
 
 export default function AddProductScreen() {
   const [name, setName] = useState('');
@@ -25,6 +26,8 @@ export default function AddProductScreen() {
   const [price, setPrice] = useState('');
   const [rating, setRating] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [permissionsGranted, setpermissionsGranted] = useState(false);
+  const [trigger, setTrigger] = useState(0);
 
   type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -32,11 +35,18 @@ export default function AddProductScreen() {
   >;
   const navigation = useNavigation<NavigationProp>();
 
-  /**
-   * Select an image and copy it to app's internal storage
-   */
   const pickImage = async () => {
     try {
+      const hasPermission = await checkAndRequestPermissions();
+
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Required',
+          'Camera and storage access are needed to pick an image.',
+        );
+        return;
+      }
+
       const res = await launchImageLibrary({
         mediaType: 'photo',
         selectionLimit: 1,
@@ -60,9 +70,41 @@ export default function AddProductScreen() {
     }
   };
 
-  /**
-   * Validate and insert product into SQLite
-   */
+  const captureImage = async () => {
+    try {
+      const hasPermission = await checkAndRequestPermissions();
+
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Required',
+          'Camera and storage access are needed to capture an image.',
+        );
+        return;
+      }
+
+      const res = await launchCamera({
+        mediaType: 'photo',
+        quality: 0.8,
+        saveToPhotos: false, 
+      });
+
+      if (res.didCancel) return;
+      const asset = res.assets?.[0];
+      if (!asset?.uri) return;
+
+      const copiedUri = await copyToAppStorage(asset.uri);
+      setImageUri(copiedUri);
+
+      Alert.alert(
+        '✅ Image Captured',
+        'Image copied to app storage successfully.',
+      );
+    } catch (err) {
+      console.error('Camera capture error:', err);
+      Alert.alert('Error', 'Could not capture image.');
+    }
+  };
+
   const handleAdd = async () => {
     const trimmedName = name.trim();
     const trimmedDescription = description.trim();
@@ -156,8 +198,7 @@ export default function AddProductScreen() {
           style={styles.input}
         />
 
-        {/* --- Image picker --- */}
-        <View style={{ alignItems: 'center', marginVertical: 10, gap:6 }}>
+        <View style={{ alignItems: 'center', marginVertical: 10, gap: 6 }}>
           {imageUri ? (
             <Image
               source={{ uri: imageUri }}
@@ -177,7 +218,10 @@ export default function AddProductScreen() {
               <Text style={{ color: '#555' }}>No Image</Text>
             </View>
           )}
-          <Button title="Pick Image" onPress={pickImage} />
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Button title="Camera" onPress={captureImage} />
+            <Button title="Gallery" onPress={pickImage} />
+          </View>
         </View>
 
         {/* --- Save --- */}

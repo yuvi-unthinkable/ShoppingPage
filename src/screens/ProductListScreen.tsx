@@ -23,7 +23,6 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Products'>;
 
 const PAGE_SIZE = 7;
 
-// Enable animation on Android
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -35,7 +34,7 @@ export default function ProductListScreen() {
   const [products, setProducts] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [rating, setRating] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -45,15 +44,13 @@ export default function ProductListScreen() {
 
   const navigation = useNavigation<NavigationProp>();
 
-  // 🕓 Debounce Search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(query.trim());
-    }, 800);
+    }, 2000);
     return () => clearTimeout(handler);
   }, [query]);
 
-  // 🔁 Load products (filters + pagination)
   const loadProducts = useCallback(
     async (pageNumber = 1) => {
       const offset = (pageNumber - 1) * PAGE_SIZE;
@@ -72,8 +69,8 @@ export default function ProductListScreen() {
         priceRange[0],
         priceRange[1],
         rating,
-        9999999,
         0,
+        999999,
       );
 
       const total = Math.ceil(allItems.length / PAGE_SIZE);
@@ -84,7 +81,6 @@ export default function ProductListScreen() {
     [debouncedQuery, priceRange, rating],
   );
 
-  // 🧭 Reload when focused or filters change
   useFocusEffect(
     useCallback(() => {
       loadProducts(1);
@@ -95,7 +91,6 @@ export default function ProductListScreen() {
     loadProducts(1);
   }, [debouncedQuery]);
 
-  // 🔄 Pull to refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     setQuery('');
@@ -105,7 +100,6 @@ export default function ProductListScreen() {
     setRefreshing(false);
   }, [loadProducts]);
 
-  // 🗑️ Delete product
   const handleDelete = (id: number, name: string) => {
     Alert.alert('Delete Product', `Delete "${name}"?`, [
       { text: 'Cancel', style: 'cancel' },
@@ -120,7 +114,6 @@ export default function ProductListScreen() {
     ]);
   };
 
-  // 🔽 Toggle section animation
   const toggleSection = (
     setter: React.Dispatch<React.SetStateAction<boolean>>,
   ) => {
@@ -128,7 +121,6 @@ export default function ProductListScreen() {
     setter(prev => !prev);
   };
 
-  // 🔢 Pagination controls
   const PaginationControls = () => (
     <View style={styles.paginationContainer}>
       <TouchableOpacity
@@ -168,7 +160,6 @@ export default function ProductListScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 🔍 Search Bar */}
       <TextInput
         placeholder="Search products (name, description, price)..."
         placeholderTextColor="#888"
@@ -177,10 +168,9 @@ export default function ProductListScreen() {
         style={styles.searchBox}
       />
 
-      {/* 🔽 Filter Dropdown (Combined) */}
       <TouchableOpacity
         style={styles.filterHeader}
-        onPress={() => toggleSection(setShowPriceSlider)} // we'll reuse one toggle
+        onPress={() => toggleSection(setShowPriceSlider)}
         activeOpacity={0.8}
       >
         <Text style={styles.filterHeaderText}>🔍 Filters</Text>
@@ -233,7 +223,6 @@ export default function ProductListScreen() {
             pressedMarkerStyle={{ backgroundColor: '#005BBB' }}
           />
 
-          {/* Apply Filter Button */}
           <TouchableOpacity
             style={styles.applyFilterButton}
             onPress={() => {
@@ -250,28 +239,22 @@ export default function ProductListScreen() {
         </View>
       )}
 
-      {/* Apply Filters */}
       <TouchableOpacity
         style={styles.filterButton}
         onPress={() => {
-          // Close both sliders first with animation
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
           setShowPriceSlider(false);
           setShowRatingSlider(false);
 
-          // Then apply filters
           loadProducts(1);
         }}
       >
         <Text style={styles.filterButtonText}>Apply Filters</Text>
       </TouchableOpacity>
 
-      {/* Product List */}
       <FlatList
         data={products}
-        keyExtractor={item => item.id.toString()}
-        numColumns={2} // ✅ two-column grid
-        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        // columnWrapperStyle={{ justifyContent: 'space-between' }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -325,7 +308,6 @@ export default function ProductListScreen() {
         ListFooterComponent={<PaginationControls />}
       />
 
-      {/* ➕ Floating Add Button */}
       <TouchableOpacity
         style={styles.fab}
         activeOpacity={0.8}
@@ -350,7 +332,6 @@ const styles = StyleSheet.create({
   dropdownLabel: { fontSize: 16, fontWeight: '600', color: '#333' },
   dropdownIcon: { fontSize: 18, color: '#007AFF' },
   sliderContainer: { alignItems: 'center', marginVertical: 10 },
-  // ✅ Combined Filter Dropdown Styles
   filterHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -427,7 +408,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 12,
     paddingTop: 12,
-    backgroundColor: '#f2f2f2', // ✅ light app background
+    backgroundColor: '#f2f2f2',
   },
   searchBox: {
     borderWidth: 1,
@@ -440,15 +421,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // ✅ Grid item container
   cardContainer: {
     flex: 1,
     marginBottom: 14,
     marginHorizontal: 4,
+    // flexDirection: 'row',
   },
 
-  // ✅ Product card style
   card: {
+    // flex: 1,
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 10,
