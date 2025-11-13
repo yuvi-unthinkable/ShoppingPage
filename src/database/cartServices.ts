@@ -46,7 +46,7 @@ export async function getCartDataForUser(userId: number) {
 
   const result = await db.executeAsync(
     `
-      SELECT productId, wishlist, cart
+      SELECT productId, wishlist, cart, quantity
       FROM cart
       WHERE userId = ?;
     `,
@@ -136,6 +136,7 @@ export async function getCartItems(userId: number) {
   const result = await db.executeAsync(
     `
       SELECT 
+        quantity,
         cart.id AS cartId,
         cart.cart,
         products.*

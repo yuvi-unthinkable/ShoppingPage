@@ -107,15 +107,12 @@ export default function WishlistList() {
                 </Text>
 
                 <View style={styles.priceRow}>
-                  <Text style={styles.price}>₹{item.price}</Text>
+                  <Text style={styles.price}>PRICE : ₹{item.price}</Text>
                   <View style={styles.ratingBadge}>
-                    <Text style={styles.star}>⭐</Text>
-                    <Text style={styles.rating}>{item.rating}</Text>
+                    <Text style={styles.star}>RATING :</Text>
+                    <Text style={styles.rating}>{item.rating}⭐</Text>
                   </View>
                 </View>
-              </View>
-
-              {/* 🔹 Remove Wishlist */}
               <TouchableOpacity
                 onPress={() => handleRemoveFromWishlist(item)}
                 style={styles.cartButton}
@@ -123,6 +120,9 @@ export default function WishlistList() {
               >
                 <Text style={styles.cartButtonText}>Remove from Wishlist</Text>
               </TouchableOpacity>
+              </View>
+
+              {/* 🔹 Remove Wishlist */}
             </View>
           </TouchableOpacity>
         )}
@@ -147,40 +147,115 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
-  cardContainer: { marginBottom: 16 },
+  cardContainer: {
+    flex: 1,
+    marginBottom: 16,
+    marginHorizontal: 6,
+    gap: 20,
+    justifyContent: 'center',
+  },
+
   card: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 5,
+  },
+
+  imageWrapper: {
+    flex: 1,
+    borderColor: 'transparent',
+    borderWidth: 2,
+    position: 'relative',
+    borderRadius: 10,
+    overflow: 'hidden',
+    maxWidth: 150,
+  },
+
+  image: {
+    width: '100%',
+    height: 160,
+    borderRadius: 10,
+    backgroundColor: '#f8f8f8',
+  },
+
+  likeButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 20,
+    padding: 6,
     elevation: 3,
   },
-  imageWrapper: { borderRadius: 10, overflow: 'hidden' },
-  image: { width: '100%', height: 160, backgroundColor: '#eee' },
-  infoContainer: { marginTop: 10 },
-  name: { fontSize: 16, fontWeight: '600', color: '#222' },
-  description: { fontSize: 13, color: '#666', marginVertical: 4 },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+
+  infoContainer: {
+    flex: 2,
+    marginTop: 10,
+    justifyContent: 'flex-start',
+    marginLeft: 20,
   },
-  price: { fontSize: 16, fontWeight: '700', color: '#007AFF' },
+
+  name: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#222',
+    marginBottom: 4,
+  },
+
+  description: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 6,
+  },
+
+  priceRow: {
+    marginTop: 4,
+  },
+
+  price: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#6e6e6ee3',
+  },
+
   ratingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF4E3',
+    // backgroundColor: '#FFF4E3',
     borderRadius: 14,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  star: { color: '#FFB300', fontSize: 14, marginRight: 2 },
-  rating: { fontSize: 13, color: '#333' },
+
+  star: {
+    // color: '#FFB300',
+    fontSize: 14,
+    marginRight: 2,
+  },
+
+  rating: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#333',
+  },
+
   cartButton: {
     marginTop: 10,
-    backgroundColor: '#E63946',
+    backgroundColor: '#a72630ff',
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: 'center',
   },
-  cartButtonText: { color: '#fff', fontWeight: '600' },
+
+  cartButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
 });

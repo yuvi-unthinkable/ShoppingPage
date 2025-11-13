@@ -31,7 +31,6 @@ export default function CartList() {
   const navigation = useNavigation<NavigationProp>();
   const { user } = useContext(UserContext);
   const userId = user?.id;
-  const [quantity, seQuantity] = useState(1);
 
   if (!userId) {
     return (
@@ -43,7 +42,7 @@ export default function CartList() {
 
   const loadCartItems = useCallback(async () => {
     const items = await getCartItems(userId);
-    console.log("🚀 ~ CartList ~ items:", items)
+    console.log('🚀 ~ CartList ~ items:', items);
     setCartItems(items);
   }, [userId]);
 
@@ -78,7 +77,6 @@ export default function CartList() {
   };
   const handleSubtractQuantity = async (productId: number) => {
     await subtractQuantity(productId, userId);
-    seQuantity(prev => prev - 1);
     loadCartItems();
   };
 
@@ -181,24 +179,35 @@ export default function CartList() {
       />
 
       <View style={styles.priceCard}>
+        <Text style={styles.summaryTitle}>Price Summary</Text>
+
         {cartItems.map(item => (
-          <View style={{ flexDirection: 'row' }}>
-            <Text>
-              <Text>{item.name}</Text> X <Text>{quantity}</Text> ={' '}
-              <Text>{item.price * quantity}</Text>
+          <View key={item.id} style={styles.summaryRow}>
+            <Text style={styles.summaryText}>
+              {item.name} × {item.quantity}
+            </Text>
+            <Text style={styles.summaryText}>
+              ₹{item.price * item.quantity}
             </Text>
           </View>
         ))}
 
-        <Text>
-          TOTAL :
-          {cartItems.reduce((acc, item, i) => {
-            console.log(item);
-            return (acc = acc + item.price * quantity);
-          }, 0)}
-        </Text>
+        <View style={styles.separator} />
 
-        <Button title="Proceed to checkout" />
+        <View style={styles.totalRow}>
+          <Text style={styles.totalText}>Total</Text>
+          <Text style={styles.totalText}>
+            ₹
+            {cartItems.reduce(
+              (acc, item) => acc + item.price * item.quantity,
+              0,
+            )}
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.checkoutButton}>
+          <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -223,17 +232,6 @@ const styles = StyleSheet.create({
 
   card: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 5,
-  },
-  priceCard: {
-    justifyContent: 'center',
     backgroundColor: '#fff',
     borderRadius: 14,
     padding: 10,
@@ -334,5 +332,66 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 14,
+  },
+  priceCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 10,
+    marginBottom: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+  },
+
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    // marginBottom: 12,
+    color: '#222',
+  },
+
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 2,
+  },
+
+  summaryText: {
+    fontSize: 15,
+    color: '#444',
+  },
+
+  separator: {
+    height: 1,
+    backgroundColor: '#ddd',
+    marginVertical: 10,
+  },
+
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+
+  totalText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#111',
+  },
+
+  checkoutButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+
+  checkoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
