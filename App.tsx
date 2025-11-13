@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import {
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
 import { initDB } from './src/database/db';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Button } from 'react-native';
 import ProductListScreen from './src/screens/ProductListScreen';
 import AddProductScreen from './src/screens/AddProductScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
@@ -12,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CartList from './src/screens/CartList';
 import { UserProvider } from './src/context/UserContext';
 import WishlistList from './src/screens/Wishlist';
+import { LogOut } from 'lucide-react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -68,8 +71,22 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator initialRouteName={initialRoute}>
           <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Home" component={Login} />
           <Stack.Screen name="SignUp" component={Signup} />
-          <Stack.Screen name="Products" component={ProductListScreen} />
+          <Stack.Screen
+            name="Products"
+            component={ProductListScreen}
+            options={({ navigation }) => ({
+              headerRight: () => (
+                <LogOut
+                  size={24}
+                  color="red"
+                  onPress={() => navigation.replace('Login')}
+                  style={{ marginRight: 12 }}
+                />
+              ),
+            })}
+          />
           <Stack.Screen name="AddProduct" component={AddProductScreen} />
           <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
           <Stack.Screen name="Cart" component={CartList} />

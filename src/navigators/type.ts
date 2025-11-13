@@ -6,5 +6,4 @@ export type RootStackParamList = {
   ProductDetail: { product: any };
   Cart : { refresh?: boolean } | undefined;
   Wishlist : { refresh?: boolean } | undefined;
-
 };

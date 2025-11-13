@@ -90,8 +90,8 @@ export default function ProductDetailScreen() {
           >
             <Heart
               size={22}
-              color={product.wishlist ? '#E63946' : '#555'}
-              fill={product.wishlist ? '#E63946' : 'none'}
+              color={prod.wishlist ? '#E63946' : '#555'}
+              fill={prod.wishlist ? '#E63946' : 'none'}
             />
           </TouchableOpacity>
         </View>
@@ -137,7 +137,7 @@ export default function ProductDetailScreen() {
         <View style={styles.detailsBox}>
           <Text style={styles.sectionTitle}>Product Details</Text>
           <Text style={styles.detailText}>
-               Quantity : {product.availableQty}{''}
+               Quantity : {product.availableQty}{'\n'}
             📦 Category: Electronics{'\n'}
             🏷️ Brand: Generic{'\n'}
             🔖 Model: {product.name}

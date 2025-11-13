@@ -234,7 +234,6 @@ const styles = StyleSheet.create({
   },
 
   star: {
-    // color: '#FFB300',
     fontSize: 14,
     marginRight: 2,
   },

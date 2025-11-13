@@ -22,29 +22,68 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const navigation = useNavigation<NavigationProp>();
 
-const handleSignup = async () => {
-  if (!firstName || !lastName || !email || !password) {
-    return Alert.alert('Error', 'All fields are required');
-  }
-
-  try {
-    const result = await registerUser(firstName, lastName, email, password);
-
-    if (!result) {
-      // Registration failed or duplicate — already handled inside registerUser
-      return;
+  const handleSignup = async () => {
+    if (!firstName || !lastName || !email || !password) {
+      return Alert.alert('Error', 'All fields are required');
     }
 
-    // Registration successful → show success + navigate
-    Alert.alert('Success', 'User Registered Successfully');
-    navigation.navigate('Login')
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : 'Something went wrong';
-    Alert.alert('Error', message);
-    console.error('❌ handleSignup error:', err);
-  }
-};
+    // ------ Added Validations (No logic changed) --------
+    const trimmedFirst = firstName.trim();
+    const trimmedLast = lastName.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPass = password.trim();
+
+    if (trimmedFirst.length < 2) {
+      return Alert.alert(
+        'Validation Error',
+        'First name must be at least 2 characters.',
+      );
+    }
+
+    if (trimmedLast.length < 2) {
+      return Alert.alert(
+        'Validation Error',
+        'Last name must be at least 2 characters.',
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return Alert.alert(
+        'Validation Error',
+        'Please enter a valid email address.',
+      );
+    }
+
+    if (trimmedPass.length < 6) {
+      return Alert.alert(
+        'Validation Error',
+        'Password must be at least 6 characters long.',
+      );
+    }
+    // ----------------------------------------------------
+
+    try {
+      const result = await registerUser(
+        trimmedFirst,
+        trimmedLast,
+        trimmedEmail,
+        trimmedPass,
+      );
+
+      if (!result) {
+        return;
+      }
+
+      Alert.alert('Success', 'User Registered Successfully');
+      navigation.navigate('Login');
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Something went wrong';
+      Alert.alert('Error', message);
+      console.error('❌ handleSignup error:', err);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -62,6 +101,7 @@ const handleSignup = async () => {
             onChangeText={setFirstName}
             style={styles.input}
           />
+
           <Text style={styles.label}>Last Name</Text>
           <TextInput
             placeholder="Enter your lastName"
@@ -70,6 +110,7 @@ const handleSignup = async () => {
             onChangeText={setLastName}
             style={styles.input}
           />
+
           <Text style={styles.label}>Email</Text>
           <TextInput
             placeholder="Enter your email"
@@ -89,6 +130,7 @@ const handleSignup = async () => {
             style={styles.input}
           />
         </View>
+
         <TouchableOpacity style={styles.signpBtn} onPress={handleSignup}>
           <Text style={styles.signpBtnText}>Signup</Text>
         </TouchableOpacity>
@@ -105,6 +147,8 @@ const handleSignup = async () => {
     </View>
   );
 }
+
+// ------------------ STYLES (unchanged) ------------------
 
 const styles = StyleSheet.create({
   container: {
@@ -124,8 +168,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
-    elevation: 4, // shadow for Android
-    shadowColor: '#000', // shadow for iOS
+    elevation: 4,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

@@ -153,7 +153,7 @@ export default function ProductListScreen() {
 
   // ❤️ Wishlist button
   const handleWishlist = async (productId: number) => {
-  console.log("hi wishlist");    
+    console.log('hi wishlist');
     const p = products.find(pr => pr.id === productId);
     const newWishlistValue = p.wishlist ? 0 : 1;
 
@@ -332,24 +332,6 @@ export default function ProductListScreen() {
           </TouchableOpacity>
         </View>
       )}
-
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={() => {
-          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-          setShowPriceSlider(false);
-          loadProducts(1);
-        }}
-      >
-        <Text style={styles.filterButtonText}>Apply Filters</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={{ padding: 10, backgroundColor: '#E63946', borderRadius: 8 }}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={{ color: '#fff', fontWeight: '700' }}>Logout</Text>
-      </TouchableOpacity>
 
       <FlatList
         data={products}
@@ -693,6 +675,7 @@ const styles = StyleSheet.create({
 
   cartButton: {
     marginTop: 10,
+    marginLeft: 10,
     backgroundColor: '#007AFF',
     borderRadius: 8,
     paddingVertical: 10,

@@ -1,3 +1,4 @@
+import { getCartItems } from './cartServices';
 import { getDB } from './db';
 import RNFS from 'react-native-fs';
 
@@ -110,8 +111,6 @@ export const deleteProduct = async (id: number, imagePath?: string) => {
   }
 };
 
-// -------------------- WISHLIST PRODUCT --------------------
-
 // -------------------- Add to Cart PRODUCT --------------------
 
 export const toggleCart = async (id: number, isCart: boolean) => {
@@ -124,4 +123,33 @@ export const toggleCart = async (id: number, isCart: boolean) => {
   } catch (error) {
     console.error('❌ toggleWishlist error:', error);
   }
+};
+
+////////////////////////////////////////////////////////////////////
+
+export const buyProduct = async (userId: number) => {
+  const db = getDB();
+
+  const items = await getCartItems(userId);
+
+  console.log('🚀 ~ buyProduct ~ items:', items);
+
+  for (const item of items) {
+    await db.executeAsync(
+      `
+      UPDATE products 
+      SET availableQty = availableQty - ? 
+      WHERE id = ?
+      `,
+      [item.quantity, item.id], 
+    );
+    console.log('qty deleted ', item.quantity);
+  }
+
+    // console.log('🚀 ~ buyProduct ~ items:', items);
+
+
+  await db.executeAsync(`DELETE FROM cart WHERE userId = ?`, [userId]);
+
+  return true;
 };

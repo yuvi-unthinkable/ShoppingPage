@@ -13,8 +13,7 @@ import React, { useCallback, useState, useEffect, useContext } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigators/type';
-import { getDB } from '../database/db';
-import { Heart } from 'lucide-react-native';
+
 import {
   addQuantity,
   getCartItems,
@@ -22,6 +21,7 @@ import {
   subtractQuantity,
 } from '../database/cartServices';
 import { UserContext } from '../context/UserContext';
+import { buyProduct } from '../database/productService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Cart'>;
 
@@ -72,6 +72,7 @@ export default function CartList() {
   };
 
   const handleAddQuantity = async (productId: number) => {
+    
     await addQuantity(productId, userId);
     loadCartItems();
   };
@@ -80,7 +81,12 @@ export default function CartList() {
     loadCartItems();
   };
 
-  console.log('>>>>>>>>>>>>>>>>>>>>>', cartItems);
+  const handleBuy = async (cartItems: object) => {
+    await buyProduct(userId);
+    loadCartItems();
+    Alert.alert('Sucess', 'All the items ordered');
+  };
+
 
   return (
     <View style={styles.container}>
@@ -135,16 +141,19 @@ export default function CartList() {
                         padding: 5,
                       }}
                     >
+
                       <Button
                         title="+"
                         color={'grey'}
                         onPress={() => handleAddQuantity(item?.id)}
+                        disabled = {item.quantity<item.availableQty ? false : true}
                       />
                       <Text>{item.quantity}</Text>
                       <Button
                         title="-"
                         color={'grey'}
                         onPress={() => handleSubtractQuantity(item?.id)}
+                        disabled={item.quantity < 1 && true}
                       />
                     </View>
                     <View style={styles.ratingBadge}>
@@ -204,8 +213,10 @@ export default function CartList() {
             )}
           </Text>
         </View>
-
-        <TouchableOpacity style={styles.checkoutButton}>
+        <TouchableOpacity
+          style={styles.checkoutButton}
+          onPress={() => handleBuy(cartItems)}
+        >
           <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
         </TouchableOpacity>
       </View>

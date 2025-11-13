@@ -131,17 +131,6 @@ export default function AddProductScreen() {
         'Validation Error',
         'Price must be between ₹10 and ₹1000.',
       );
-    if (isNaN(numericAailablility))
-      return Alert.alert('Validation Error', 'Please enter a valid price.');
-    if (numericAailablility < 1 || numericAailablility > 10)
-      return Alert.alert(
-        'Validation Error',
-        'Availablity must be between 1 and 10.',
-      );
-    if (isNaN(numericRating))
-      return Alert.alert('Validation Error', 'Please enter a valid rating.');
-    if (numericRating < 1 || numericRating > 5)
-      return Alert.alert('Validation Error', 'Rating must be between 1 and 5.');
 
     try {
       await insertProductInDb({
@@ -198,19 +187,72 @@ export default function AddProductScreen() {
           style={styles.input}
         />
         <TextInput
-          placeholder="Available Qty"
+          placeholder="Available Qty (1–10)"
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={availableQty}
-          onChangeText={setAvailableQty}
           style={styles.input}
+          onChangeText={value => {
+            // Allow empty during typing
+            if (value === '') {
+              setAvailableQty('');
+              return;
+            }
+
+            const numericAvailability = Number(value);
+
+            // Not a number
+            if (isNaN(numericAvailability)) {
+              Alert.alert('Validation Error', 'Please enter a valid number.');
+              return;
+            }
+
+            // Out of range
+            if (numericAvailability < 1 || numericAvailability > 10) {
+              Alert.alert(
+                'Validation Error',
+                'Availability must be between 1 and 10.',
+              );
+              return;
+            }
+
+            // Valid → update state
+            setAvailableQty(value);
+          }}
         />
+
         <TextInput
           placeholder="Rating (1–5)"
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={rating}
-          onChangeText={setRating}
+          onChangeText={value => {
+            // Allow empty (so user can edit text)
+            if (value === '') {
+              setRating('');
+              return;
+            }
+
+            const numericRating = Number(value);
+
+            // Not a number
+            if (isNaN(numericRating)) {
+              Alert.alert('Validation Error', 'Please enter a valid number.');
+              return;
+            }
+
+            // Out of range
+            if (numericRating < 1 || numericRating > 5) {
+              Alert.alert(
+                'Validation Error',
+                'Rating must be between 1 and 5.',
+              );
+              return;
+            }
+
+            // Valid → update state
+            setRating(value);
+          }}
           style={styles.input}
         />
 
