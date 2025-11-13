@@ -22,7 +22,13 @@ export const addProduct = async (
       [name, description, price, rating, image ?? null],
     );
 
-    console.log('✅ Product added:', { name, description, price, rating, image });
+    console.log('✅ Product added:', {
+      name,
+      description,
+      price,
+      rating,
+      image,
+    });
     return result;
   } catch (error) {
     console.error('❌ addProduct error:', error);
@@ -101,5 +107,21 @@ export const deleteProduct = async (id: number, imagePath?: string) => {
     }
   } catch (error) {
     console.error('❌ deleteProduct error:', error);
+  }
+};
+
+// -------------------- WISHLIST PRODUCT --------------------
+
+// -------------------- Add to Cart PRODUCT --------------------
+
+export const toggleCart = async (id: number, isCart: boolean) => {
+  try {
+    const db = getDB();
+    await db.executeAsync(`UPDATE products SET cart = ? WHERE id = ?`, [
+      isCart ? 1 : 0,
+      id,
+    ]);
+  } catch (error) {
+    console.error('❌ toggleWishlist error:', error);
   }
 };

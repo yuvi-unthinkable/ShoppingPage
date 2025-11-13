@@ -9,7 +9,6 @@ export const initDB = async () => {
   try {
     db = open({ name: 'productApp.db' });
 
-    // ✅ Added image column
     await db.executeAsync(`
       CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,9 +16,32 @@ export const initDB = async () => {
         description TEXT,
         price REAL,
         rating INTEGER,
-        image TEXT
+        image TEXT,
+        availableQty
       );
     `);
+
+    await db.executeAsync(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        firstName TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        lastName TEXT NOT NULL,
+        password TEXT NOT NULL
+      );
+   `);
+    await db.executeAsync(`
+      CREATE TABLE IF NOT EXISTS cart (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        productId INTEGER NOT NULL,
+        userId INTEGER NOT NULL,
+        wishlist INTEGER DEFAULT 0,
+        cart INTEGER DEFAULT 0,
+        quantity INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (productId) REFERENCES products(id),
+        FOREIGN KEY (userId) REFERENCES users(id)
+      );
+   `);
 
     console.log('✅ products table ready');
   } catch (error) {
@@ -36,6 +58,7 @@ export async function insertProductInDb(product: {
   description?: string;
   rating?: number;
   image?: string | null; // ✅ allow null explicitly
+  availableQty?: number;
 }) {
   const db = await getDB();
   if (!db) {
@@ -44,8 +67,8 @@ export async function insertProductInDb(product: {
   }
 
   const sql = `
-    INSERT INTO products (name, price, description, rating, image)
-    VALUES (?, ?, ?, ?, ?);
+    INSERT INTO products (name, price, description, rating, image,availableQty)
+    VALUES (?, ?, ?, ?, ?,?);
   `;
 
   await db.executeAsync(sql, [
@@ -53,7 +76,8 @@ export async function insertProductInDb(product: {
     product.price,
     product.description || '',
     product.rating || 0,
-    product.image ?? null, // ✅ safe null fallback
+    product.image ?? null,
+    product.availableQty,
   ]);
 
   console.log('✅ Product inserted successfully:', product.name);
@@ -71,6 +95,10 @@ export async function getAllProducts() {
   );
   return result.rows?._array || [];
 }
+
+/**
+ * add to like table
+ */
 
 /**
  * Get the active DB instance

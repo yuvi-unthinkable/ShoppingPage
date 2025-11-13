@@ -6,7 +6,6 @@ export async function copyToAppStorage(sourceUri: string, destFileName?: string)
   const name = destFileName ?? `product_${Date.now()}.jpg`;
   const destPath = `${RNFS.DocumentDirectoryPath}/${name}`;
 
-  // On Android content:// URIs sometimes need to be read via RNFS.copyFile
   // RNFS.copyFile supports file:// and content:// (RNFS >= supported). If you hit issues,
   // use react-native-blob-util to read streams. Try RNFS.copyFile first.
   const normalizedSrc = sourceUri.startsWith('file://') ? sourceUri.replace('file://', '') : sourceUri;

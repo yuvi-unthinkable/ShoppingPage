@@ -26,8 +26,7 @@ export default function AddProductScreen() {
   const [price, setPrice] = useState('');
   const [rating, setRating] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [permissionsGranted, setpermissionsGranted] = useState(false);
-  const [trigger, setTrigger] = useState(0);
+  const [availableQty, setAvailableQty] = useState('');
 
   type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -85,7 +84,7 @@ export default function AddProductScreen() {
       const res = await launchCamera({
         mediaType: 'photo',
         quality: 0.8,
-        saveToPhotos: false, 
+        saveToPhotos: false,
       });
 
       if (res.didCancel) return;
@@ -110,6 +109,7 @@ export default function AddProductScreen() {
     const trimmedDescription = description.trim();
     const numericPrice = parseFloat(price);
     const numericRating = parseInt(rating);
+    const numericAailablility = parseInt(availableQty);
 
     // 🔍 Validation checks
     if (!trimmedName)
@@ -131,6 +131,13 @@ export default function AddProductScreen() {
         'Validation Error',
         'Price must be between ₹10 and ₹1000.',
       );
+    if (isNaN(numericAailablility))
+      return Alert.alert('Validation Error', 'Please enter a valid price.');
+    if (numericAailablility < 1 || numericAailablility > 10)
+      return Alert.alert(
+        'Validation Error',
+        'Availablity must be between 1 and 10.',
+      );
     if (isNaN(numericRating))
       return Alert.alert('Validation Error', 'Please enter a valid rating.');
     if (numericRating < 1 || numericRating > 5)
@@ -143,6 +150,7 @@ export default function AddProductScreen() {
         price: numericPrice,
         rating: numericRating,
         image: imageUri,
+        availableQty: numericAailablility,
       });
 
       Alert.alert('✅ Success', 'Product added successfully!');
@@ -187,6 +195,14 @@ export default function AddProductScreen() {
           keyboardType="numeric"
           value={price}
           onChangeText={setPrice}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Available Qty"
+          placeholderTextColor="#888"
+          keyboardType="numeric"
+          value={availableQty}
+          onChangeText={setAvailableQty}
           style={styles.input}
         />
         <TextInput

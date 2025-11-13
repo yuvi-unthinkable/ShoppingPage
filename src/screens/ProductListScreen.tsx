@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,24 @@ import {
   Platform,
   UIManager,
   Image,
+  Button,
 } from 'react-native';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import { getProducts, deleteProduct } from '../database/productService';
+import {
+  getProducts,
+  deleteProduct,
+  toggleCart,
+} from '../database/productService';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigators/type';
+import { Heart } from 'lucide-react-native';
+import { LogTables, ProductTable } from '../database/Logtables';
+import {
+  getCartDataForUser,
+  insertOrUpdateCart,
+} from '../database/cartServices';
+import { UserContext } from '../context/UserContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Products'>;
 
@@ -31,6 +43,7 @@ if (
 }
 
 export default function ProductListScreen() {
+  const { user } = useContext(UserContext);
   const [products, setProducts] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -40,9 +53,17 @@ export default function ProductListScreen() {
   const [totalPages, setTotalPages] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [showPriceSlider, setShowPriceSlider] = useState(false);
-  const [showRatingSlider, setShowRatingSlider] = useState(false);
+  const [cartDb, setCartDb] = useState<any[]>([]);
+  const [qty, setQty] = useState();
 
   const navigation = useNavigation<NavigationProp>();
+
+  console.log('🚀 ~ ProductListScreen ~ user:', user);
+
+  useEffect(() => {
+    LogTables();
+    ProductTable();
+  }, []);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -73,12 +94,28 @@ export default function ProductListScreen() {
         999999,
       );
 
+      if (!user?.id) {
+        console.log('⛔ Cannot load products, user undefined');
+        return;
+      }
+
+      const cartData = await getCartDataForUser(user.id);
+
+      const mergedList = list.map((p: any) => {
+        const match = cartData.find((c: any) => c.productId === p.id);
+        return {
+          ...p,
+          wishlist: match?.wishlist === 1,
+          cart: match?.cart === 1,
+        };
+      });
+
       const total = Math.ceil(allItems.length / PAGE_SIZE);
-      setProducts(list);
+      setProducts(mergedList);
       setTotalPages(total);
       setPage(pageNumber);
     },
-    [debouncedQuery, priceRange, rating],
+    [debouncedQuery, priceRange, rating, user?.id],
   );
 
   useFocusEffect(
@@ -112,6 +149,39 @@ export default function ProductListScreen() {
         },
       },
     ]);
+  };
+
+  // ❤️ Wishlist button
+  const handleWishlist = async (productId: number) => {
+  console.log("hi wishlist");    
+    const p = products.find(pr => pr.id === productId);
+    const newWishlistValue = p.wishlist ? 0 : 1;
+
+    if (!user || !user.id) return;
+
+    await insertOrUpdateCart({
+      productId,
+      userId: user.id,
+      wishlist: newWishlistValue,
+    });
+
+    await loadProducts(page);
+  };
+
+  // 🛒 Cart button
+  const handleAddToCart = async (productId: number) => {
+    const p = products.find(pr => pr.id === productId);
+    const newCartValue = p.cart ? 0 : 1;
+
+    if (!user || !user.id) return;
+
+    await insertOrUpdateCart({
+      productId,
+      userId: user.id,
+      cart: newCartValue,
+    });
+
+    await loadProducts(); // this reloads updated global qty
   };
 
   const toggleSection = (
@@ -158,8 +228,32 @@ export default function ProductListScreen() {
     </View>
   );
 
+  console.log('products>>>>>>>>>>', products);
+
   return (
     <View style={styles.container}>
+      <View style={styles.topButtonsRow}>
+        <TouchableOpacity
+          style={styles.topButton}
+          activeOpacity={0.8}
+          onPress={() =>
+            navigation.navigate('Wishlist', { refresh: true } as never)
+          }
+        >
+          <Text style={styles.topButtonText}>Wishlist</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.topButton}
+          activeOpacity={0.8}
+          onPress={() =>
+            navigation.navigate('Cart', { refresh: true } as never)
+          }
+        >
+          <Text style={styles.topButtonText}>Cart</Text>
+        </TouchableOpacity>
+      </View>
+
       <TextInput
         placeholder="Search products (name, description, price)..."
         placeholderTextColor="#888"
@@ -244,12 +338,17 @@ export default function ProductListScreen() {
         onPress={() => {
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
           setShowPriceSlider(false);
-          setShowRatingSlider(false);
-
           loadProducts(1);
         }}
       >
         <Text style={styles.filterButtonText}>Apply Filters</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={{ padding: 10, backgroundColor: '#E63946', borderRadius: 8 }}
+        onPress={() => navigation.navigate('Login')}
+      >
+        <Text style={{ color: '#fff', fontWeight: '700' }}>Logout</Text>
       </TouchableOpacity>
 
       <FlatList
@@ -260,44 +359,87 @@ export default function ProductListScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         contentContainerStyle={{ paddingBottom: 100 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('ProductDetail', { product: item })
-            }
-            onLongPress={() => handleDelete(item.id, item.name)}
-            activeOpacity={0.9}
-            style={styles.cardContainer}
-          >
-            <View style={styles.card}>
-              <Image
-                source={
-                  item.image
-                    ? { uri: item.image }
-                    : require('../assets/images/placeholder.png')
-                }
-                style={styles.image}
-                resizeMode="cover"
-              />
+        renderItem={({ item }) => {
+          if (item.availableQty <= 0) return null;
 
-              <Text style={styles.name} numberOfLines={2}>
-                {item.name}
-              </Text>
+          return (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('ProductDetail', { product: item })
+              }
+              onLongPress={() => handleDelete(item.id, item.name)}
+              activeOpacity={0.9}
+              style={styles.cardContainer}
+            >
+              <View style={styles.card}>
+                {/* 🔹 Product Image with Heart Button */}
+                <View style={styles.imageWrapper}>
+                  <Image
+                    source={
+                      item.image
+                        ? { uri: item.image }
+                        : require('../assets/images/placeholder.png')
+                    }
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
 
-              <Text style={styles.description} numberOfLines={2}>
-                {item.description}
-              </Text>
+                  <TouchableOpacity
+                    onPress={() => handleWishlist(item.id)}
+                    style={styles.likeButton}
+                    activeOpacity={0.7}
+                  >
+                    <Heart
+                      size={22}
+                      color={item.wishlist ? '#E63946' : '#555'}
+                      fill={item.wishlist ? '#E63946' : 'none'}
+                    />
+                  </TouchableOpacity>
+                </View>
 
-              <View style={styles.priceRow}>
-                <Text style={styles.price}>₹{item.price}</Text>
-                <View style={styles.ratingBadge}>
-                  <Text style={styles.star}>⭐</Text>
-                  <Text style={styles.rating}>{item.rating}</Text>
+                <View>
+                  {/* 🔹 Product Info */}
+                  <View style={styles.infoContainer}>
+                    <Text style={styles.name} numberOfLines={2}>
+                      {item.name}
+                    </Text>
+
+                    <Text style={styles.description} numberOfLines={2}>
+                      {item.description}
+                    </Text>
+
+                    <View style={styles.priceRow}>
+                      <Text style={styles.price}>Price : ₹{item.price}</Text>
+                      <View>
+                        <Text style={styles.price}>
+                          Qty : {item.availableQty}
+                        </Text>
+                        <View style={styles.ratingBadge}>
+                          <Text style={styles.star}>Rating </Text>
+                          <Text style={styles.rating}>{item.rating}⭐</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* 🔹 Add to Cart Button */}
+                  <TouchableOpacity
+                    onPress={() => handleAddToCart(item.id)}
+                    style={[
+                      styles.cartButton,
+                      { backgroundColor: item.cart ? '#4CAF50' : '#007AFF' }, // green when added
+                    ]}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.cartButtonText}>
+                      {item.cart ? 'Added to Cart' : 'Add to Cart'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            </View>
-          </TouchableOpacity>
-        )}
+            </TouchableOpacity>
+          );
+        }}
         ListEmptyComponent={
           <View style={{ alignItems: 'center', marginTop: 40 }}>
             <Text style={{ color: '#888', fontSize: 16 }}>
@@ -410,6 +552,37 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     backgroundColor: '#f2f2f2',
   },
+  // Top Buttons
+  topButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    marginHorizontal: 4,
+  },
+
+  topButton: {
+    flex: 1,
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginHorizontal: 6,
+
+    // Shadow (iOS + Android)
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  topButtonText: {
+    textAlign: 'center',
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+
   searchBox: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -423,29 +596,55 @@ const styles = StyleSheet.create({
 
   cardContainer: {
     flex: 1,
-    marginBottom: 14,
-    marginHorizontal: 4,
-    // flexDirection: 'row',
+    marginBottom: 16,
+    marginHorizontal: 6,
+    gap: 20,
   },
 
   card: {
-    // flex: 1,
+    flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 14,
     padding: 10,
-    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 5,
+  },
+
+  imageWrapper: {
+    flex: 1,
+    borderColor: 'transparent',
+    borderWidth: 2,
+    position: 'relative',
+    borderRadius: 10,
+    overflow: 'hidden',
+    maxWidth: 150,
   },
 
   image: {
     width: '100%',
-    height: 150,
+    height: 160,
     borderRadius: 10,
-    marginBottom: 8,
     backgroundColor: '#f8f8f8',
+  },
+
+  likeButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 20,
+    padding: 6,
+    elevation: 3,
+  },
+
+  infoContainer: {
+    flex: 2,
+    marginTop: 10,
+    justifyContent: 'flex-start',
+    marginLeft: 20,
   },
 
   name: {
@@ -462,29 +661,49 @@ const styles = StyleSheet.create({
   },
 
   priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginTop: 4,
   },
 
   price: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007AFF',
+    color: '#6e6e6ee3',
   },
 
   ratingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF4E3',
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    // backgroundColor: '#FFF4E3',
+    borderRadius: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
 
-  star: { color: '#FFB300', fontSize: 14, marginRight: 2 },
-  rating: { fontSize: 13, color: '#333', fontWeight: '500' },
+  star: {
+    color: '#FFB300',
+    fontSize: 14,
+    marginRight: 2,
+  },
+
+  rating: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#333',
+  },
+
+  cartButton: {
+    marginTop: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+
+  cartButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
 
   fab: {
     position: 'absolute',

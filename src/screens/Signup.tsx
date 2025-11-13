@@ -7,47 +7,70 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { RootStackParamList } from '../navigators/type';
+import React, { useState } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loginUser } from '../database/userServices';
-import { UserContext } from '../context/UserContext';
+import { RootStackParamList } from '../navigators/type';
+import { useNavigation } from '@react-navigation/native';
+import { registerUser } from '../database/userServices';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
 
-export default function Login() {
+export default function Signup() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation<NavigationProp>();
-  const { setUser } = useContext(UserContext);
 
+const handleSignup = async () => {
+  if (!firstName || !lastName || !email || !password) {
+    return Alert.alert('Error', 'All fields are required');
+  }
 
-  const handleLogin = async () => {
-    if (!email || !password)
-      return Alert.alert('error', 'Please enter email and password');
-    console.log('hii login>>>>>', email, password);
-    const user = await loginUser(email, password);
-    if (!user) return Alert.alert('Error', 'Invalid Credentials');
+  try {
+    const result = await registerUser(firstName, lastName, email, password);
 
-    await AsyncStorage.setItem('loggedInUser', JSON.stringify(user));
-    setUser(user); 
-    navigation.reset({
-      index: 0, 
-      routes: [{ name: 'Products', params: { userDetail: user } }],
-    });
-  };
+    if (!result) {
+      // Registration failed or duplicate — already handled inside registerUser
+      return;
+    }
+
+    // Registration successful → show success + navigate
+    Alert.alert('Success', 'User Registered Successfully');
+    navigation.navigate('Login')
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : 'Something went wrong';
+    Alert.alert('Error', message);
+    console.error('❌ handleSignup error:', err);
+  }
+};
 
   return (
     <View style={styles.container}>
       <Text style={styles.appName}>Product Listing</Text>
 
       <View style={styles.formContainer}>
-        <Text style={styles.heading}>Welcome back 👋</Text>
+        <Text style={styles.heading}>Welcome here 👋</Text>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Username</Text>
+          <Text style={styles.label}>First Name</Text>
+          <TextInput
+            placeholder="Enter your firstName"
+            placeholderTextColor="#888"
+            value={firstName}
+            onChangeText={setFirstName}
+            style={styles.input}
+          />
+          <Text style={styles.label}>Last Name</Text>
+          <TextInput
+            placeholder="Enter your lastName"
+            placeholderTextColor="#888"
+            value={lastName}
+            onChangeText={setLastName}
+            style={styles.input}
+          />
+          <Text style={styles.label}>Email</Text>
           <TextInput
             placeholder="Enter your email"
             placeholderTextColor="#888"
@@ -66,16 +89,16 @@ export default function Login() {
             style={styles.input}
           />
         </View>
-        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-          <Text style={styles.loginBtnText}>Login</Text>
+        <TouchableOpacity style={styles.signpBtn} onPress={handleSignup}>
+          <Text style={styles.signpBtnText}>Signup</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.signupContainer}
-          onPress={() => navigation.navigate('SignUp')}
+          onPress={() => navigation.navigate('Login')}
         >
           <Text style={styles.signupText}>
-            Don't have an account? <Text style={styles.signupLink}>Signup</Text>
+            Registered Already? <Text style={styles.signupLink}>Login</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -88,14 +111,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f9f9f9',
     paddingHorizontal: 24,
-    paddingTop: 80,
+    paddingTop: 40,
   },
   appName: {
     fontSize: 32,
     fontWeight: '700',
     color: '#1a73e8',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   formContainer: {
     backgroundColor: '#fff',
@@ -133,7 +156,7 @@ const styles = StyleSheet.create({
     color: '#000',
     backgroundColor: '#fafafa',
   },
-  loginBtn: {
+  signpBtn: {
     backgroundColor: '#1a73e8',
     borderRadius: 10,
     paddingVertical: 10,
@@ -145,7 +168,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  loginBtnText: {
+  signpBtnText: {
     color: '#fff',
     fontSize: 17,
     fontWeight: '600',
