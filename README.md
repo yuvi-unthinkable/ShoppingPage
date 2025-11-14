@@ -1,97 +1,298 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+📦 Product Listing App (React Native + SQLite)
 
-# Getting Started
+A fully offline-first Product Listing & Cart Management application built with React Native, SQLite, React Navigation, Context API, and local file storage.
+Users can sign up, log in, add products with images, filter and search products, add to wishlist/cart, manage quantities, and complete checkout.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+🚀 Features
+🔐 Authentication System
 
-## Step 1: Start Metro
+User signup with validation
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+Login with SQLite credentials
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Duplicate email prevention
 
-```sh
-# Using npm
-npm start
+Session persistence using AsyncStorage
 
-# OR using Yarn
-yarn start
-```
+Context API for global user state
 
-## Step 2: Build and run your app
+Logout using navigation.replace()
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+📦 Product Management
 
-### Android
+Add products with:
 
-```sh
-# Using npm
-npm run android
+Name
 
-# OR using Yarn
-yarn android
-```
+Description
 
-### iOS
+Price
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+Available quantity
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Rating
 
-```sh
-bundle install
-```
+Image (via camera or gallery)
 
-Then, and every time you update your native dependencies, run:
+SQLite-based CRUD
 
-```sh
-bundle exec pod install
-```
+Delete product with image cleanup
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Pagination (7 items per page)
 
-```sh
-# Using npm
-npm run ios
+Search (debounced: 2 seconds)
 
-# OR using Yarn
-yarn ios
-```
+Filters:
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Price range
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Minimum rating
 
-## Step 3: Modify your app
+Product detail screen
 
-Now that you have successfully run the app, let's make changes!
+Image fallback if no image exists
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+MultiSlider for interactive filters
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+🛒 Cart & Wishlist
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Add/remove from cart
 
-## Congratulations! :tada:
+Add/remove wishlist
 
-You've successfully run and modified your React Native App. :partying_face:
+Quantity update for each item
 
-### Now what?
+Quantity limits based on available stock
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+Total price calculation
 
-# Troubleshooting
+Remove individual items
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+Checkout flow:
 
-# Learn More
+Deduct stock
 
-To learn more about React Native, take a look at the following resources:
+Clear cart
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Success message
+
+🖼 Image Handling
+
+Camera + Gallery support
+
+Permissions for iOS & Android
+
+Local file storage using RNFS
+
+Handles file:// and content:// URIs
+
+Fallback to base64 read/write
+
+Auto-delete images when product is removed
+
+📱 UI/UX Enhancements
+
+LayoutAnimation for filter collapsible section
+
+Pull-to-refresh on lists
+
+KeyboardAvoidingView in forms
+
+Floating Action Button (FAB)
+
+Pagination UI
+
+Clean card-based layout with rating & price
+
+Empty-state components
+
+Smooth navigation across screens
+
+🗄 SQLite & Local Storage
+
+Tables included:
+
+users
+
+products
+
+cart (wishlist + cart flags + quantity)
+
+Queries used:
+
+CRUD operations
+
+JOIN for cart
+
+LIKE for search
+
+LIMIT + OFFSET for pagination
+
+BETWEEN for filters
+
+Ordered queries
+
+🛠 Tech Stack
+Frontend
+
+React Native
+
+TypeScript / JavaScript
+
+Context API
+
+Database
+
+SQLite (react-native-quick-sqlite)
+
+Storage & Device APIs
+
+React Native FS (RNFS)
+
+React Native Image Picker
+
+React Native Permissions
+
+Navigation
+
+@react-navigation/native
+
+@react-navigation/native-stack
+
+📂 Project Structure
+src/
+ ├── database/
+ │    ├── db.ts
+ │    ├── productService.ts
+ │    ├── cartServices.ts
+ │    ├── userServices.ts
+ │
+ ├── screens/
+ │    ├── Login.tsx
+ │    ├── Signup.tsx
+ │    ├── ProductListScreen.tsx
+ │    ├── AddProductScreen.tsx
+ │    ├── CartList.tsx
+ │    ├── Wishlist.tsx
+ │    ├── ProductDetailScreen.tsx
+ │
+ ├── context/
+ │    ├── UserContext.tsx
+ │
+ ├── utils/
+ │    ├── fileHelper.ts
+ │    ├── Permissions.ts
+ │
+ ├── navigators/
+ │    ├── type.ts
+ │
+ App.tsx
+
+📸 Screenshots
+
+(Add your images here)
+
+/screenshots
+├── login.png
+├── signup.png
+├── product-list.png
+├── add-product.png
+├── cart.png
+├── wishlist.png
+
+▶️ Installation
+1️⃣ Clone the repository:
+git clone your-repo-url
+cd your-app
+
+2️⃣ Install dependencies:
+npm install
+
+3️⃣ iOS setup:
+cd ios && pod install && cd ..
+npx react-native run-ios
+
+4️⃣ Android setup:
+npx react-native run-android
+
+🔧 Environment Requirements
+
+Node.js
+
+React Native CLI
+
+Android Studio / Xcode
+
+iOS 13+ / Android 6+
+
+Physical device recommended for camera testing
+
+🧪 Testing the App
+
+Create an account
+
+Login
+
+Add multiple products with images
+
+Search & filter
+
+Add items to wishlist
+
+Add to cart
+
+Update quantity (bounded by stock)
+
+Checkout and see stock reduce
+
+📐 Architecture Decisions
+
+Service-layer architecture keeps UI clean
+
+SQLite chosen over realm/watermelonDB for simplicity
+
+RNFS + app storage ensures images persist offline
+
+Context API manages global user state
+
+React Navigation separates stacks cleanly
+
+Debounce reduces DB load
+
+Parameterized queries prevent SQL injection
+
+JOIN queries used for cart → product mapping
+
+🛡 Security Considerations
+
+SQL Injection prevention via parameterized queries
+
+Passwords stored as plain text in local DB (acceptable for demo apps, but hashing is recommended)
+
+Permission handling follows platform best practices
+
+🔮 Future Enhancements
+
+Product categories
+
+API integration
+
+Image compression & caching
+
+Dark mode
+
+Fingerprint login
+
+Redux Toolkit instead of Context
+
+Transaction wrapping for checkout
+
+Improved UI animations
+
+🤝 Contributions
+
+Feel free to fork this project, raise issues, or submit pull requests!
+
+📄 License
+
+MIT License
