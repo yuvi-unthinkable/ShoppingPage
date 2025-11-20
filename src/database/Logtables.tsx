@@ -22,3 +22,13 @@ export const ProductTable = async () => {
     console.error('❌ Error listing products:', error);
   }
 };
+export const Profiletable = async () => {
+  try {
+    const db = await getDB(); // ✅ ensure async call
+    const result = await db.executeAsync('SELECT * FROM profile;');
+    console.log('📋 Data in profile table:', result.rows?._array || []);
+    return result.rows?._array || [];
+  } catch (error) {
+    console.error('❌ Error listing profile:', error);
+  }
+};

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import {
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { initDB } from './src/database/db';
 import { View, Text, ActivityIndicator, Button } from 'react-native';
 import ProductListScreen from './src/screens/ProductListScreen';
@@ -14,7 +12,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CartList from './src/screens/CartList';
 import { UserProvider } from './src/context/UserContext';
 import WishlistList from './src/screens/Wishlist';
-import { LogOut } from 'lucide-react-native';
+import { ListChecks, LogOut, PlusSquareIcon, User } from 'lucide-react-native';
+import Profile from './src/screens/Profile';
+import UserRecords from './src/screens/UserRecords';
+import ProfileForm from './src/screens/ProfileForm';
 
 const Stack = createNativeStackNavigator();
 
@@ -78,12 +79,28 @@ export default function App() {
             component={ProductListScreen}
             options={({ navigation }) => ({
               headerRight: () => (
-                <LogOut
-                  size={24}
-                  color="red"
-                  onPress={() => navigation.replace('Login')}
-                  style={{ marginRight: 12 }}
-                />
+                <>
+                  <PlusSquareIcon
+                    size={24}
+                    color="red"
+                    onPress={() =>
+                      navigation.navigate('Profile', { refresh: true } as never)
+                    }
+                    style={{ marginRight: 12 }}
+                  />
+                  <ListChecks
+                    size={24}
+                    color="red"
+                    onPress={() => navigation.navigate('ProfileRecords')}
+                    style={{ marginRight: 12 }}
+                  />
+                  <LogOut
+                    size={24}
+                    color="red"
+                    onPress={() => navigation.replace('Login')}
+                    style={{ marginRight: 12 }}
+                  />
+                </>
               ),
             })}
           />
@@ -91,6 +108,8 @@ export default function App() {
           <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
           <Stack.Screen name="Cart" component={CartList} />
           <Stack.Screen name="Wishlist" component={WishlistList} />
+          <Stack.Screen name="Profile" component={ProfileForm} />
+          <Stack.Screen name="ProfileRecords" component={UserRecords} />
         </Stack.Navigator>
       </NavigationContainer>
     </UserProvider>

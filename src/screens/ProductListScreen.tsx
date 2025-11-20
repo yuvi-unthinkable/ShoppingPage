@@ -12,24 +12,19 @@ import {
   Platform,
   UIManager,
   Image,
-  Button,
 } from 'react-native';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import {
-  getProducts,
-  deleteProduct,
-  toggleCart,
-} from '../database/productService';
+import { getProducts, deleteProduct } from '../database/productService';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigators/type';
 import { Heart } from 'lucide-react-native';
-import { LogTables, ProductTable } from '../database/Logtables';
 import {
   getCartDataForUser,
   insertOrUpdateCart,
 } from '../database/cartServices';
 import { UserContext } from '../context/UserContext';
+import { Profiletable } from '../database/Logtables';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Products'>;
 
@@ -53,17 +48,9 @@ export default function ProductListScreen() {
   const [totalPages, setTotalPages] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [showPriceSlider, setShowPriceSlider] = useState(false);
-  const [cartDb, setCartDb] = useState<any[]>([]);
-  const [qty, setQty] = useState();
-
   const navigation = useNavigation<NavigationProp>();
 
   console.log('🚀 ~ ProductListScreen ~ user:', user);
-
-  useEffect(() => {
-    LogTables();
-    ProductTable();
-  }, []);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -335,7 +322,6 @@ export default function ProductListScreen() {
 
       <FlatList
         data={products}
-        // columnWrapperStyle={{ justifyContent: 'space-between' }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

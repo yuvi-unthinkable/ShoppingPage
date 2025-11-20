@@ -139,7 +139,8 @@ export const buyProduct = async (userId: number) => {
       `
       UPDATE products 
       SET availableQty = availableQty - ? 
-      WHERE id = ?
+      WHERE id = ?🚀 ~ addProfileRecord ~ error: Error: [react-native-quick-sqlite] SQL execution error: near "UPDATE": syntax error
+
       `,
       [item.quantity, item.id], 
     );

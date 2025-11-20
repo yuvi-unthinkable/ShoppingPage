@@ -17,7 +17,7 @@ export const initDB = async () => {
         price REAL,
         rating INTEGER,
         image TEXT,
-        availableQty
+        availableQty INTEGER
       );
     `);
 
@@ -43,6 +43,19 @@ export const initDB = async () => {
       );
    `);
 
+    await db.executeAsync(`
+      CREATE TABLE IF NOT EXISTS profile (
+        label TEXT PRIMARY KEY UNIQUE NOT NULL,
+        userId NUMBER NOT NULL,
+          name TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          email TEXT NOT NULL,
+          height INTEGER NOT NULL,
+          extra TEXT 
+      )
+      
+    `);
+
     console.log('✅ products table ready');
   } catch (error) {
     console.error('❌ Error initializing DB:', error);
@@ -57,7 +70,7 @@ export async function insertProductInDb(product: {
   price: number;
   description?: string;
   rating?: number;
-  image?: string | null; // ✅ allow null explicitly
+  image?: string | null;
   availableQty?: number;
 }) {
   const db = await getDB();
@@ -66,19 +79,20 @@ export async function insertProductInDb(product: {
     return;
   }
 
-  const sql = `
+  await db.executeAsync(
+    `
     INSERT INTO products (name, price, description, rating, image,availableQty)
     VALUES (?, ?, ?, ?, ?,?);
-  `;
-
-  await db.executeAsync(sql, [
-    product.name,
-    product.price,
-    product.description || '',
-    product.rating || 0,
-    product.image ?? null,
-    product.availableQty,
-  ]);
+  `,
+    [
+      product.name,
+      product.price,
+      product.description || '',
+      product.rating || 0,
+      product.image ?? null,
+      product.availableQty,
+    ],
+  );
 
   console.log('✅ Product inserted successfully:', product.name);
 }
@@ -96,16 +110,17 @@ export async function getAllProducts() {
   return result.rows?._array || [];
 }
 
-/**
- * add to like table
- */
-
-/**
- * Get the active DB instance
- */
 export const getDB = () => {
   if (!db) {
     console.warn('⚠️ getDB() called before initDB()');
   }
   return db;
 };
+
+export async function columnExists(columnName: string) {
+  const db = getDB();
+  const result = await db.executeAsync(`PRAGMA table_info(profile);`);
+
+  const columns = result.rows?._array || [];
+  return columns.some((col: any) => col.name === columnName);
+}

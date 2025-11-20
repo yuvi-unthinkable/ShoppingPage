@@ -148,7 +148,6 @@ export default function Signup() {
   );
 }
 
-// ------------------ STYLES (unchanged) ------------------
 
 const styles = StyleSheet.create({
   container: {

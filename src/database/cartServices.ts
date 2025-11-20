@@ -66,8 +66,6 @@ export async function insertOrUpdateCart(cart: {
   const db = await getDB();
   if (!db) return;
 
-  console.log(" hello insertOrUpdateCart");
-
   // Check if product exists for this user
   const existing = await db.executeAsync(
     'SELECT * FROM cart WHERE productId = ? AND userId = ?',
