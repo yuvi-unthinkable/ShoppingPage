@@ -3,7 +3,6 @@ import { columnExists, getDB } from './db';
 
 export type ProfileInput = {
   userId: number;
-  label: string;
   name: string;
   phone: string;
   email: string;
@@ -11,14 +10,12 @@ export type ProfileInput = {
 
   address?: string;
   additionalText?: string;
-  label2?: string;
   intrests?: string[];
   dob?: Date;
 };
 
 export type ProfileRow = {
   userId: number;
-  label: string;
   name: string;
   phone: string;
   email: string;
@@ -26,57 +23,18 @@ export type ProfileRow = {
   extra: string;
 };
 
-export const addProfileRecord = async (props: ProfileInput) => {
+export const addProfileRecord = async (userId: number, dataString: string) => {
   try {
     const db = getDB();
 
-    const {
-      userId,
-      label,
-      name,
-      phone,
-      email,
-      height,
-      address,
-      additionalText,
-      label2,
-      intrests,
-      dob,
-    } = props;
-    console.log('🚀 ~ addProfileRecord ~ props:', props);
-
-    // 🔍 Check if label already exists
-    const existing = await db.executeAsync(
-      'SELECT label FROM profile WHERE LOWER(label) = LOWER(?);',
-      [label.trim()],
-    );
-
-    const extraObj: any = {};
-    console.log('🚀 ~ addProfileRecord ~ extraObj:', extraObj);
-    if (address) extraObj.address = address;
-    if (additionalText) extraObj.additionalText = additionalText;
-    if (label2) extraObj.label2 = label2;
-    if (intrests) extraObj.intrests = intrests;
-    if (dob) extraObj.dob = dob.toISOString();
-
-    const extraJSON = JSON.stringify(extraObj);
-
     const query = `
       INSERT INTO profile (
-        userId, label, name, phone, email, height, extra
+        userId, userData
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      VALUES (?,?)
     `;
 
-    const values = [
-      userId,
-      label.trim(),
-      name.trim(),
-      phone.toString(),
-      email.trim(),
-      height,
-      extraJSON,
-    ];
+    const values = [userId, dataString];
     console.log('🚀 ~ addProfileRecord ~ values:', values);
 
     const result = await db.executeAsync(query, values);
@@ -88,10 +46,9 @@ export const addProfileRecord = async (props: ProfileInput) => {
   }
 };
 
-export const getProfileRecord = async (
-  userId: number,
-): Promise<ProfileRow | null> => {
+export const getProfileRecord = async (userId: number) => {
   const db = getDB();
+  console.log('USER ID >>>>>>>>>>>>>>>>', userId);
   try {
     const result = await db.executeAsync(
       `SELECT * FROM profile WHERE userId = ?`,
@@ -101,40 +58,40 @@ export const getProfileRecord = async (
 
     if (result.rows.length === 0) return null;
 
-    return result.rows._array as ProfileRow;
+    return result.rows._array;
   } catch (error) {
     console.log('getProfileRecord error:', error);
     return null;
   }
 };
 
-export const updateProfile = async (
-  userId: number,
-  address?: string,
-  additionalText?: string,
-  label2?: string,
-  intrests?: string[],
-  dob?: Date,
-) => {
+export const getRecordData = async (id: number): Promise<ProfileRow | null> => {
+  const db = getDB();
+
+  try {
+    const result = await db.executeAsync(
+      `
+      SELECT * FROM profile WHERE id = ?
+      `,
+      [id],
+    );
+    console.log('🚀 ~ getRecordData ~ result:', result);
+    if (result.rows.length === 0) return null;
+
+    return result.rows._array?.[0] as ProfileRow;
+  } catch (error) {
+    console.log('getRecordData error:', error);
+    return null;
+  }
+};
+
+export const updateProfile = async (id: number, userData: string) => {
   try {
     const db = getDB();
 
-    const row = await getProfileRecord(userId);
-    if (!row) return null;
-
-    const extraObj = row.extra ? JSON.parse(row.extra) : {};
-
-    if (address !== undefined) extraObj.address = address;
-    if (additionalText !== undefined) extraObj.additionalText = additionalText;
-    if (label2 !== undefined) extraObj.label2 = label2;
-    if (intrests !== undefined) extraObj.intrests = intrests;
-    if (dob !== undefined) extraObj.dob = dob.toISOString();
-
-    const extraJSON = JSON.stringify(extraObj);
-
     return await db.executeAsync(
-      `UPDATE profile SET extra = ? WHERE userId = ?`,
-      [extraJSON, userId],
+      `UPDATE profile SET userData = ? WHERE id = ?`,
+      [userData, id],
     );
   } catch (error) {
     console.log('updateProfile error:', error);

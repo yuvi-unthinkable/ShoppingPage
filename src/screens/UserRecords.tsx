@@ -13,9 +13,7 @@ import {
   UIManager,
   Image,
 } from 'react-native';
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import { getProducts, deleteProduct } from '../database/productService';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigators/type';
 import { UserContext } from '../context/UserContext';
@@ -53,25 +51,14 @@ export default function UserRecords() {
       if (user) {
         const list = await getProfileRecord(user.id);
         console.log('🚀 ~ UserRecords ~ list:', list);
-
-        const allItems = await getProducts(
-          debouncedQuery,
-          priceRange[0],
-          priceRange[1],
-          rating,
-          0,
-          999999,
-        );
+        if (list) {
+          setProducts(list);
+        }
 
         if (!user?.id) {
           console.log(' Cannot load products, user undefined');
           return;
         }
-
-        const total = Math.ceil(allItems.length / PAGE_SIZE);
-        setProducts(list);
-        setTotalPages(total);
-        setPage(pageNumber);
       }
     },
     [debouncedQuery, priceRange, rating, user?.id],
@@ -81,151 +68,108 @@ export default function UserRecords() {
     loadProducts();
   }, []);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    setQuery('');
-    setPriceRange([0, 1000]);
-    setRating(0);
-    await loadProducts(1);
-    setRefreshing(false);
-  }, [loadProducts]);
+  // const onRefresh = useCallback(async () => {
+  //   setRefreshing(true);
+  //   setQuery('');
+  //   setPriceRange([0, 1000]);
+  //   setRating(0);
+  //   await loadProducts(1);
+  //   setRefreshing(false);
+  // }, [loadProducts]);
 
-  const handleDelete = (id: number, name: string) => {
-    Alert.alert('Delete Product', `Delete "${name}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteProduct(id);
-          await loadProducts(page);
-        },
-      },
-    ]);
-  };
+  // const handleDelete = (id: number, name: string) => {
+  //   Alert.alert('Delete Product', `Delete "${name}"?`, [
+  //     { text: 'Cancel', style: 'cancel' },
+  //     {
+  //       text: 'Delete',
+  //       style: 'destructive',
+  //       onPress: async () => {
+  //         await deleteProduct(id);
+  //         await loadProducts(page);
+  //       },
+  //     },
+  //   ]);
+  // };
 
-  const toggleSection = (
-    setter: React.Dispatch<React.SetStateAction<boolean>>,
-  ) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setter(prev => !prev);
-  };
+  // const toggleSection = (
+  //   setter: React.Dispatch<React.SetStateAction<boolean>>,
+  // ) => {
+  //   LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  //   setter(prev => !prev);
+  // };
 
-  const PaginationControls = () => (
-    <View style={styles.paginationContainer}>
-      <TouchableOpacity
-        style={[styles.pageButton, page === 1 && styles.disabledButton]}
-        disabled={page === 1}
-        onPress={() => loadProducts(page - 1)}
-      >
-        <Text style={styles.pageButtonText}>Prev</Text>
-      </TouchableOpacity>
+  // const PaginationControls = () => (
+  //   <View style={styles.paginationContainer}>
+  //     <TouchableOpacity
+  //       style={[styles.pageButton, page === 1 && styles.disabledButton]}
+  //       disabled={page === 1}
+  //       onPress={() => loadProducts(page - 1)}
+  //     >
+  //       <Text style={styles.pageButtonText}>Prev</Text>
+  //     </TouchableOpacity>
 
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
-        <TouchableOpacity
-          key={num}
-          onPress={() => loadProducts(num)}
-          style={[styles.pageNumber, num === page && styles.activePage]}
-        >
-          <Text
-            style={num === page ? styles.activePageText : styles.pageNumberText}
-          >
-            {num}
-          </Text>
-        </TouchableOpacity>
-      ))}
+  //     {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+  //       <TouchableOpacity
+  //         key={num}
+  //         onPress={() => loadProducts(num)}
+  //         style={[styles.pageNumber, num === page && styles.activePage]}
+  //       >
+  //         <Text
+  //           style={num === page ? styles.activePageText : styles.pageNumberText}
+  //         >
+  //           {num}
+  //         </Text>
+  //       </TouchableOpacity>
+  //     ))}
 
-      <TouchableOpacity
-        style={[
-          styles.pageButton,
-          page === totalPages && styles.disabledButton,
-        ]}
-        disabled={page === totalPages}
-        onPress={() => loadProducts(page + 1)}
-      >
-        <Text style={styles.pageButtonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  //     <TouchableOpacity
+  //       style={[
+  //         styles.pageButton,
+  //         page === totalPages && styles.disabledButton,
+  //       ]}
+  //       disabled={page === totalPages}
+  //       onPress={() => loadProducts(page + 1)}
+  //     >
+  //       <Text style={styles.pageButtonText}>Next</Text>
+  //     </TouchableOpacity>
+  //   </View>
+  // );
 
-  const UserCard = ({ user }: { user: any }) => {
-    const extra = user.extra ? JSON.parse(user.extra) : {};
-    console.log('🚀 ~ UserCard ~ extra:', extra);
-    console.log('🚀 ~ UserCard ~ user:', user);
+  const UserCard = ({ user }) => {
+    const userData = user.userData ? JSON.parse(user.userData) : {};
+    console.log('userData:', userData);
 
     return (
       <View style={styles.card}>
-        <Text style={styles.title}>{user.label || 'User Profile'}</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('FormScreen', { id: user.id })}
+        >
+          {/* DYNAMIC FIELDS */}
+          {Object.entries(userData).map(([key, value]) => {
+            return (
+              <View key={key} style={styles.row}>
+                <Text style={styles.label}>{key}:</Text>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Name:</Text>
-          <Text style={styles.value}>{user.name || '-'}</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{user.email || '-'}</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>Phone:</Text>
-          <Text style={styles.value}>{user.phone || '-'}</Text>
-        </View>
-
-        {extra.address ? (
-          <View style={styles.row}>
-            <Text style={styles.label}>Address:</Text>
-            <Text style={styles.value}>{extra.address}</Text>
-          </View>
-        ) : null}
-
-        {extra.additionalText ? (
-          <View style={styles.row}>
-            <Text style={styles.label}>About:</Text>
-            <Text style={styles.value}>{extra.additionalText}</Text>
-          </View>
-        ) : null}
-
-        <View style={styles.row}>
-          <Text style={styles.label}>Height:</Text>
-          <Text style={styles.value}>
-            {user.height ? `${user.height} FT` : '-'}
-          </Text>
-        </View>
-
-        {extra.gender ? (
-          <View style={styles.row}>
-            <Text style={styles.label}>Gender:</Text>
-            <Text style={styles.value}>{extra.gender}</Text>
-          </View>
-        ) : null}
-
-        <View style={styles.rowVertical}>
-          <Text style={styles.label}>Interests:</Text>
-          <View style={styles.chipContainer}>
-            {extra.intrests?.length > 0 ? (
-              extra.intrests.map((item, idx) => (
-                <View key={idx} style={styles.chip}>
-                  <Text style={styles.chipText}>{item}</Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.value}>None</Text>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>Birth Date:</Text>
-          <Text style={styles.value}>
-            {extra.dob ? new Date(extra.dob).toDateString() : '-'}
-          </Text>
-        </View>
+                {/* Array case — Interests */}
+                {Array.isArray(value) ? (
+                  <Text style={[styles.value]}>{value.join(', ')}</Text>
+                ) : // Date case
+                key.toLowerCase() === 'dob' ? (
+                  <Text style={styles.value}>
+                    {new Date(value).toDateString()}
+                  </Text>
+                ) : (
+                  <Text style={styles.value}>{value || '-'}</Text>
+                )}
+              </View>
+            );
+          })}
+        </TouchableOpacity>
       </View>
     );
   };
 
-  console.log('products>>>>>>>>>>', products);
+  // console.log('products>>>>>>>>>>', products);
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <FlatList

@@ -45,13 +45,9 @@ export const initDB = async () => {
 
     await db.executeAsync(`
       CREATE TABLE IF NOT EXISTS profile (
-        label TEXT PRIMARY KEY UNIQUE NOT NULL,
-        userId NUMBER NOT NULL,
-          name TEXT NOT NULL,
-          phone TEXT NOT NULL,
-          email TEXT NOT NULL,
-          height INTEGER NOT NULL,
-          extra TEXT 
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId NUMBER NOT NULL,
+          userData TEXT NOT NULL
       )
       
     `);

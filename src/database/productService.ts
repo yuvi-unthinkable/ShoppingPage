@@ -51,7 +51,7 @@ export const getProducts = async (
     const db = getDB();
     if (!db) return [];
 
-    const query = `
+    const query = `profile
       SELECT * FROM products
       WHERE (
         LOWER(name) LIKE LOWER(?) OR 

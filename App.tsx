@@ -16,6 +16,7 @@ import { ListChecks, LogOut, PlusSquareIcon, User } from 'lucide-react-native';
 import Profile from './src/screens/Profile';
 import UserRecords from './src/screens/UserRecords';
 import ProfileForm from './src/screens/ProfileForm';
+import FormScreen from './src/screens/FormScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -110,6 +111,7 @@ export default function App() {
           <Stack.Screen name="Wishlist" component={WishlistList} />
           <Stack.Screen name="Profile" component={ProfileForm} />
           <Stack.Screen name="ProfileRecords" component={UserRecords} />
+          <Stack.Screen name="FormScreen" component={FormScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </UserProvider>

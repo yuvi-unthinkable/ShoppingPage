@@ -8,4 +8,6 @@ export type RootStackParamList = {
   Wishlist: { refresh?: boolean } | undefined;
   Profile: undefined;
   ProfileRecords : undefined;
+  FormScreen : {id : number};
+
 };

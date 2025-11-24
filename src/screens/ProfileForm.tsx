@@ -67,18 +67,18 @@ export default function ProfileForm() {
   const [date, setDate] = useState(new Date());
   const [gender, setGender] = useState('');
   const [formValid, setFormValid] = useState(false);
-  const [showFormData, setShowFormData] = useState(false);
+  const [showFormFields, setShowFormFields] = useState(false);
 
   const [textInputTypes, setTextInputTypes] = useState([
-    { label: 'Name', value: 'Name' },
-    { label: 'Phone', value: 'Phone' },
-    { label: 'Email', value: 'Email' },
+    // { label: 'Name', value: 'Name' },
+    // { label: 'Phone', value: 'Phone' },
+    // { label: 'Email', value: 'Email' },
     { label: 'Address', value: 'Address' },
     { label: 'Text Area', value: 'textArea' },
   ]);
 
   const [dropdownInputTypes, setDropdownInputTypes] = useState([
-    { label: 'Height', value: 'height' },
+    // { label: 'Height', value: 'height' },
     { label: 'Gender', value: 'gender' },
     { label: 'Intrests', value: 'intrests' },
   ]);
@@ -87,7 +87,7 @@ export default function ProfileForm() {
     if (fieldType || isFocus) {
       return (
         <Text style={[styles.sectionTitle, isFocus && { color: 'blue' }]}>
-          Dropdown label are here
+          Add additionals Fields
         </Text>
       );
     }
@@ -99,20 +99,8 @@ export default function ProfileForm() {
       {
         type: 'text-input',
         data: {
-          inputType: 'Label',
-          minLength: 3,
-          maxLength: 50,
-          required: true,
-          value: label,
-          placeholder: 'Enter label',
-          onChange: setLabel,
-          error: '',
-        },
-      },
-      {
-        type: 'text-input',
-        data: {
           inputType: 'Name',
+          label: 'Name',
           minLength: 6,
           maxLength: 50,
           required: true,
@@ -126,6 +114,7 @@ export default function ProfileForm() {
         type: 'text-input',
         data: {
           inputType: 'Email',
+          label: 'Email',
           minLength: 6,
           maxLength: 255,
           required: true,
@@ -140,6 +129,7 @@ export default function ProfileForm() {
         type: 'text-input',
         data: {
           inputType: 'Phone',
+          label: 'Phone',
           minLength: 10,
           maxLength: 10,
           required: true,
@@ -180,6 +170,7 @@ export default function ProfileForm() {
         type: 'dropdown',
         data: {
           inputType: 'height',
+          label: 'Height',
           data: height,
           required: true,
           value: userHeight,
@@ -246,34 +237,32 @@ export default function ProfileForm() {
       date,
     ],
   );
-  useEffect(() => {
-    btnAvailable()
-//     let isValid = true;
-//     const updatedFieldsState = [...fieldsState];
+  //     let isValid = true;
+    //     const updatedFieldsState = [...fieldsState];
 
-//     fieldsState.forEach(item => {
-//       const err = validateField(item);
-//       if (err) {
-//         isValid = false;
-//       }
+    //     fieldsState.forEach(item => {
+    //       const err = validateField(item);
+    //       if (err) {
+    //         isValid = false;
+    //       }
 
-//       updatedFieldsState.forEach(f => {
-//         if (f.data.label === item.data.label) {
-//           f.data.error = err;
-//         }
-//       });
-//     });
+    //       updatedFieldsState.forEach(f => {
+    //         if (f.data.label === item.data.label) {
+    //           f.data.error = err;
+    //         }
+    //       });
+    //     });
 
-//     setFieldsState(updatedFieldsState);
-  }, [name, email, label, userHeight, phone]);
+    //     setFieldsState(updatedFieldsState);
+  // }, [name, email, userHeight, phone]);
 
   const validateField = (field: any) => {
     const v = field?.data?.value;
     const rule = field?.data?.rule;
 
-    if (!field?.data?.required && !v) {
-      return '';
-    }
+    // if (!field?.data?.required && !v) {
+    //   return '';
+    // }
 
     // Required check
     if (field?.data?.required && !v) {
@@ -306,12 +295,33 @@ export default function ProfileForm() {
 
   const [fieldsState, setFieldsState] = useState<any[]>([]);
 
+  useEffect(() => {
+    const newArr = fields
+      .filter(item => item.data.required === true)
+      .map(item => ({
+        ...item,
+
+        data: {
+          ...item.data,
+          // label: label, // update the label
+        },
+      }));
+
+    console.log('newArr>>>>>>>>>>>>', newArr);
+
+    setFieldsState(prev => [...prev, ...newArr]);
+  }, []);
+
+    useEffect(() => {
+  setFormValid(btnAvailable());
+}, [fieldsState]);  
+
   const handleAddSection = (
     fieldType: string,
     inputTypes?: string,
     label?: string,
   ) => {
-    if (fieldType === 'date') {
+    if (fieldType === 'datePicker') {
       const newArr = fields
         .filter(item => item.type === fieldType)
         .map(item => ({
@@ -322,6 +332,8 @@ export default function ProfileForm() {
             label: label, // update the label
           },
         }));
+
+      console.log('newArr>>>>>>>>>>>>', newArr);
 
       setFieldsState(prev => [...prev, ...newArr]);
     }
@@ -339,6 +351,8 @@ export default function ProfileForm() {
           label: label, // update the label
         },
       }));
+
+    console.log('newArr>>>>>>>>>>>>', newArr);
 
     setFieldsState(prev => [...prev, ...newArr]);
 
@@ -399,7 +413,7 @@ export default function ProfileForm() {
                 handleAddSection(fieldType, textFieldType, label);
                 setLabel('');
                 setIsShowAddField(false);
-                setShowFormData(true);
+                setShowFormFields(true);
               }}
             />
           </>
@@ -453,13 +467,19 @@ export default function ProfileForm() {
                 handleAddSection(fieldType, dropdownFieldType, label);
                 setLabel('');
                 setIsShowAddField(false);
-                setShowFormData(true);
+                setShowFormFields(true);
               }}
             />
           </>
         )}
         {fieldType === 'datePicker' && (
-          <View style={{ marginVertical: 10 }}>
+          <View style={[styles.row, { gap: 10, marginVertical: 10 }]}>
+            <TextInput
+              value={label}
+              placeholder="label"
+              style={styles.input}
+              onChangeText={setLabel}
+            />
             <Button
               title="Add"
               onPress={() => {
@@ -472,9 +492,9 @@ export default function ProfileForm() {
                   return;
                 }
 
-                handleAddSection(fieldType);
+                handleAddSection(fieldType, '', label);
                 setIsShowAddField(false);
-                setShowFormData(true);
+                setShowFormFields(true);
               }}
             />
           </View>
@@ -484,46 +504,49 @@ export default function ProfileForm() {
   };
 
   const handleSubmit = async () => {
-    const payload = {
-      userId: user?.id,
-      label: name,
-      name,
-      phone,
-      email,
-      height: userHeight,
-      address,
-      additionalText: additionalInfo,
-      intrests,
-      dob: date,
-    };
+    const formData = fieldsState.reduce((acc, item) => {
+      acc[item.data.label] = item.data.value;
+      return acc;
+    }, {});
+
+    console.log('🚀 ~ handleSubmit ~ formData:', formData);
+
+    const dataString = JSON.stringify(formData);
+    console.log('🚀 ~ handleSubmit ~ dataString:', dataString);
 
     try {
-      const result = await addProfileRecord(payload as any);
-      console.log('🚀 ~ handleSubmit ~ result:', result);
-      console.log('Profile added:', result);
+      if (user) {
+        const result = await addProfileRecord(user.id, dataString as string);
+        console.log('🚀 ~ handleSubmit ~ result:', result);
+        console.log('Profile added:', result);
 
-      if (result)
-        Alert.alert('Sucess', 'your information has been saved sucessfuly');
+        if (result)
+          Alert.alert('Sucess', 'your information has been saved sucessfuly');
+      }
     } catch (error) {
       console.log('Submit error:', error);
       Alert.alert('Error', 'your data cannot be saved');
     }
   };
-   
+
 const btnAvailable = () => {
-  const invalid = fields.some(el => {
-    if (!el.data.required) return false;
+  for (const field of fieldsState) {
+    const { required, value, error } = field.data;
 
-    const value = el.data.value;
-    return value === '' || value === 0 || value == null;
-  });
+    // Required but empty
+    if (required && !value) return false;
 
-  return !invalid;
+    // Has an error message
+    if (error && error.length > 0) return false;
+  }
+
+  return true; // All required fields filled + no errors
 };
 
-  const formData = () => {
-    console.log('🚀 ~ formData ~ showFormData:', showFormData);
-    if (!showFormData) return null;
+
+  const FormFields = () => {
+    console.log('🚀 ~ FormFields ~ showFormFields:', showFormFields);
+    if (!showFormFields) return null;
     return (
       <View style={{ marginVertical: 10 }}>
         <FlatList
@@ -540,7 +563,7 @@ const btnAvailable = () => {
                         placeholder={item.data.placeholder}
                         maxLength={item.data.maxLength}
                         multiline={item.data?.inputType === 'textArea'}
-                        onBlur={()=>validateField(item)}
+                        onBlur={() => validateField(item)}
                         onChangeText={text => {
                           setFieldsState(prev =>
                             prev.map(f =>
@@ -549,8 +572,7 @@ const btnAvailable = () => {
                                 : f,
                             ),
                           );
-                          
-                          
+
                           item.data.onChange(text);
 
                           const err = validateField({
@@ -750,16 +772,20 @@ const btnAvailable = () => {
                   <View>
                     <>
                       <View style={styles.row}>
-                        <Text style={styles.labelText}>DOB : </Text>
-                        <TouchableOpacity onPress={() => setOpen(true)}>
+                        <Text style={styles.labelText}>{item.data?.label}</Text>
+                        <TouchableOpacity
+                          style={[styles.input, { justifyContent: 'center' }]}
+                          onPress={() => setOpen(true)}
+                        >
                           <Text
                             style={{
-                              fontSize: 16,
-                              color: '#333',
-                              fontWeight: '600',
+                              fontSize: 15,
+                              color: item.data.value ? '#111' : '#999',
                             }}
                           >
-                            {item.data?.value.toDateString()}
+                            {item.data.value
+                              ? item.data.value.toDateString()
+                              : 'Select date'}
                           </Text>
                         </TouchableOpacity>
 
@@ -831,17 +857,18 @@ const btnAvailable = () => {
         />
 
         <TouchableOpacity
-          style={[styles.submitBtn, !formValid && { backgroundColor: '#888' }]}
+          style={[
+            styles.submitBtn,
+            !btnAvailable() && { backgroundColor: '#888' },
+          ]}
           onPress={handleSubmit}
-            disabled={!btnAvailable()}
+          disabled={!btnAvailable()}
         >
           <Text style={styles.submitBtnText}>Submit</Text>
         </TouchableOpacity>
       </View>
     );
   };
-
-  console.log('fieldsState>>>>>>>>>>>>', fieldsState);
 
   return (
     <View style={styles.container}>
@@ -873,7 +900,7 @@ const btnAvailable = () => {
           }}
         />
         {addingInputFields(fieldType)}
-        {formData()}
+        {FormFields()}
       </ScrollView>
     </View>
   );
