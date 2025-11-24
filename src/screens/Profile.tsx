@@ -77,6 +77,8 @@ export default function Profile() {
   const { user } = useContext(UserContext);
   const [formValid, setFormValid] = useState(false);
 
+  
+
   const fields = useMemo(
     () => [
       {
