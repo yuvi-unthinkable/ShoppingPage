@@ -51,7 +51,7 @@ export const getProducts = async (
     const db = getDB();
     if (!db) return [];
 
-    const query = `profile
+    const query = `
       SELECT * FROM products
       WHERE (
         LOWER(name) LIKE LOWER(?) OR 
@@ -64,6 +64,8 @@ export const getProducts = async (
       LIMIT ? OFFSET ?;
     `;
 
+    console.log('hello buddy!!!!!!!!!!!!!!!!!!!!');
+
     const result = await db.executeAsync(query, [
       `%${search}%`,
       `%${search}%`,
@@ -74,6 +76,7 @@ export const getProducts = async (
       limit,
       offset,
     ]);
+    console.log('🚀 ~ getProducts ~ result:', result);
 
     return result.rows?._array ?? [];
   } catch (error) {
@@ -142,13 +145,12 @@ export const buyProduct = async (userId: number) => {
       WHERE id = ?🚀 ~ addProfileRecord ~ error: Error: [react-native-quick-sqlite] SQL execution error: near "UPDATE": syntax error
 
       `,
-      [item.quantity, item.id], 
+      [item.quantity, item.id],
     );
     console.log('qty deleted ', item.quantity);
   }
 
-    // console.log('🚀 ~ buyProduct ~ items:', items);
-
+  // console.log('🚀 ~ buyProduct ~ items:', items);
 
   await db.executeAsync(`DELETE FROM cart WHERE userId = ?`, [userId]);
 

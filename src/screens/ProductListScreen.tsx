@@ -219,27 +219,7 @@ export default function ProductListScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.topButtonsRow}>
-        <TouchableOpacity
-          style={styles.topButton}
-          activeOpacity={0.8}
-          onPress={() =>
-            navigation.navigate('Wishlist', { refresh: true } as never)
-          }
-        >
-          <Text style={styles.topButtonText}>Wishlist</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.topButton}
-          activeOpacity={0.8}
-          onPress={() =>
-            navigation.navigate('Cart', { refresh: true } as never)
-          }
-        >
-          <Text style={styles.topButtonText}>Cart</Text>
-        </TouchableOpacity>
-      </View>
+      
 
       <TextInput
         placeholder="Search products (name, description, price)..."
