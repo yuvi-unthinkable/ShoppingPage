@@ -22,6 +22,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { AppDrawer } from './src/screens/AppDrawer';
 
 const Stack = createNativeStackNavigator();
 
@@ -76,7 +77,7 @@ export default function App() {
       <UserProvider>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName={'Home'}
+            initialRouteName={'AppDrawer'}
             screenOptions={{ headerShown: false }}
           >
             <Stack.Screen name="Login" component={Login} />
@@ -101,6 +102,7 @@ export default function App() {
             <Stack.Screen name="ProfileForm" component={ProfileForm} />
             <Stack.Screen name="ProfileRecords" component={UserRecords} />
             <Stack.Screen name="FormScreen" component={FormScreen} />
+            <Stack.Screen name="AppDrawer" component={AppDrawer} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserProvider>

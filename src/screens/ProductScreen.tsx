@@ -11,7 +11,7 @@ export default function ShopTabs() {
   return (
     <SafeAreaView style={{flex:1}}>
 
-    <Tab.Navigator>
+    <Tab.Navigator screenOptions={{swipeEnabled:false}}>
       <Tab.Screen name="Home" component={ProductListScreen} />
       <Tab.Screen name="Cart" component={CartList} />
       <Tab.Screen name="WishList" component={WishlistList} />
